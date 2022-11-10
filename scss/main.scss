@@ -1,7 +1,8 @@
-$color--black: #000;
+$color--black: #1d1d1f;
 $color--white: #fff;
 
 body {
+	overflow: hidden;
 	background-color: $color--black;
 	h1 {
 		color: $color--white;
@@ -10,8 +11,9 @@ body {
 	}
 }
 
-canvas.webgl{
+.webgl{
 	position: fixed;
 	top: 0;
 	left: 0;
+	outline: none;
 }
