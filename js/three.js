@@ -7,71 +7,116 @@ const canvas = document.querySelector('canvas.webgl')
 /*
     scene
 */
-const scene = new  THREE.Scene();
-
-
+const scene = new THREE.Scene();
 
 /*
     object
 */
-// const geometry = new THREE.BoxGeometry(1,1,1)
-// const material = new THREE.MeshBasicMaterial({ color: 0xff0000 })
-// const mesh = new THREE.Mesh(geometry, material)
-// scene.add(mesh)
-
 
 // create box****************************
 // const w = 1000, h = 700;
 // const Lx = 55, N1x = 435, Gx = 20;
 // const Ly = 138.5, Ny = Ly-61, Gy= 174 ;
 const w = 1000, h = 700;
-const Lx = 0, N1x = 630, Gx = 0;
+const Lx = 55, N1x = 435, Gx = 20;
 const Ly = 138.5, Ny = Ly-61, Gy= 174 ;
 
+const shape_01 = [
+    [0, 0],
+    [Lx,0],
+    [Lx,Ly],
+    [Lx+165,Ly],
+    [Lx+165,Ny],
 
-const shape = new THREE.Shape();
-shape.moveTo( 0,0 );
+    [N1x,Ny],
+    [N1x,Ly],
+    [N1x+205,Ly],
+    [N1x+205,Ny],
 
-shape.lineTo( Lx,0 );
-shape.lineTo( Lx,Ly );
-shape.lineTo( Lx+165,Ly );
-shape.lineTo( Lx+165,Ny );
+    [w-Gx-127-35,Ny],
+    [w-Gx-127-35,Ly],
+    [w-Gx-127,Ly],
+    [w-Gx-127,Gy],
+    [w-Gx,Gy],
+    [w-Gx,0],
+    [w,0],
 
-shape.lineTo( N1x,Ny );
-shape.lineTo( N1x,Ly );
-shape.lineTo( N1x+205,Ly );
-shape.lineTo( N1x+205,Ny );
+    [w,h],
+    [0,h],
+    [0,0]
+]
 
-shape.lineTo( w-Gx-127-35,Ny );
-shape.lineTo( w-Gx-127-35,Ly );
-shape.lineTo( w-Gx-127,Ly );
-shape.lineTo( w-Gx-127,Gy );
-shape.lineTo( w-Gx,Gy );
-shape.lineTo( w-Gx,0 );
-shape.lineTo( w,0 );
+const shape_02 = [
+    [0, 0],
+    [5, 0],
+    [5, 5],
+    [0, 5],
+    [0, 0]
+]
 
-shape.lineTo( w,h );
-shape.lineTo( 0,h );
-shape.lineTo( 0,0 );
+class Block{
+    constructor(){
+        this.extrudeSettings = {
+            steps: 5,
+            depth: 20,
+            bevelEnabled: true,
+            bevelThickness: 1,
+            bevelSize: 5,
+            bevelOffset: 0,
+            bevelSegments: 5
+        };
 
-const extrudeSettings = {
-	steps: 2,
-	depth: 16,
-	bevelEnabled: true,
-	bevelThickness: 1,
-	bevelSize: 1,
-	bevelOffset: 0,
-	bevelSegments: 1
-};
+        this.blockShape = new THREE.Shape();
 
-const geometry2 = new THREE.ExtrudeGeometry( shape, extrudeSettings );
-const material2 = new THREE.MeshBasicMaterial( { color: 0x00ff00 } );
-const mesh2 = new THREE.Mesh( geometry2, material2 ) ;
-scene.add( mesh2 );
+        this.position = [0,0,0]
+        this.rotation = [0,0,0]
 
-mesh2.rotation.x = Math.PI * 1;
-mesh2.position.x = -500;
-mesh2.position.y = 350;
+    }
+    addScene(_scene){
+        this.blockGeo = new THREE.ExtrudeGeometry( this.blockShape, this.extrudeSettings );
+        this.blockMat = new THREE.MeshPhongMaterial();
+        this.blockMat.shininess = 100
+        this.blockMat.specular = new THREE.Color(0x1188ff)
+        
+
+        this.blockMesh = new THREE.Mesh(this.blockGeo, this.blockMat)
+        _scene.add(this.blockMesh)
+    }
+    editShapeLine(_shapeLine){
+        this.blockShape.curves = [];
+        this.blockShape.moveTo( _shapeLine[0][0], _shapeLine[0][1]);
+        for (let i = 1; i <  _shapeLine.length; i++) {
+            this.blockShape.lineTo( _shapeLine[i][0], _shapeLine[i][1])
+        }
+    }
+    movePosition(x,y,z){
+        this.position = [x,y,z];
+        this.blockMesh.position.x = this.position[0];
+        this.blockMesh.position.y = this.position[1];
+        this.blockMesh.position.z = this.position[2];
+    }
+    moveRotation(x,y,z){
+        this.rotation = [x,y,z];
+        this.blockMesh.rotation.x = this.rotation[0]*Math.PI;
+        this.blockMesh.rotation.y = this.rotation[1]*Math.PI;
+        this.blockMesh.rotation.z = this.rotation[2]*Math.PI;
+    }
+}
+
+const b1 = new Block();
+
+b1.editShapeLine(shape_01);
+b1.addScene(scene);
+b1.movePosition(0,-500,0);
+b1.moveRotation(0,0,0.5);
+
+// const b2 = new Block();
+// b2.editShapeLine(shape_01);
+// b2.addScene(scene);
+// b2.movePosition(0,-450,100);
+// b2.moveRotation(0,0,0.5);
+
+
 
 /*
     camera
@@ -82,8 +127,8 @@ const sizes = {
 }
 
 const camera = new THREE.PerspectiveCamera(75, sizes.width / sizes.height, 1, 100000)
-camera.position.z = 1000
-camera.lookAt(mesh2.position)
+camera.position.z = 1000;
+// camera.lookAt(b1.position)
 scene.add(camera)
 
 /*
@@ -115,7 +160,18 @@ const controls = new OrbitControls(camera, canvas)
 controls.target.y = 2
 controls.enableDamping = true
 
+const ambientLight = new THREE.AmbientLight(0xffffff, 0.5)
+scene.add(ambientLight)
+// ...
 
+const pointLight = new THREE.PointLight(0xffffff, 0.5)
+pointLight.position.x = 2000
+pointLight.position.y = 3000
+pointLight.position.z = 4000
+scene.add(pointLight)
+
+const axesHelper = new THREE.AxesHelper( 500 );
+scene.add( axesHelper );
 /*
     animaition
 */
@@ -124,15 +180,15 @@ const clock = new THREE.Clock()
 
 const tick = () =>
 {
-    // const elapsedTime = clock.getElapsedTime()
+    const elapsedTime = clock.getElapsedTime()
 
     // camera.position.x = Math.sin(cursor.x * Math.PI * 2) * 2
     // camera.position.z = Math.cos(cursor.x * Math.PI * 2) * 2
     // camera.position.y = cursor.y * 3
     controls.update()
-    // camera.lookAt(mesh2.position)
+    camera.lookAt(b1.blockMesh.position)
 
-    // mesh.rotation.y = elapsedTime
+    b1.blockMesh.rotation.x = elapsedTime
     renderer.render(scene, camera)
 
     
