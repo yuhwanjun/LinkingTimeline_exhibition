@@ -17,20 +17,6 @@ body {
 	left: 0;
 	outline: none;
 	z-index: -1;
-}
-
-.logo_linking {
-	position: fixed;
-	z-index: 100;
-	height: 20vh;
-	top: 1.5vw;
-	left: 1.5vw;
-}
-
-.logo_timeline {
-	position: fixed;
-	z-index: 100;
-	height: 15.8vh;
-	bottom: 1.5vw;
-	right: 1.5vw;
+	width: 100%;
+	height: 100%;
 }
